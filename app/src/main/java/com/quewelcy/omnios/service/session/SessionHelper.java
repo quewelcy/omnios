@@ -28,7 +28,10 @@ public class SessionHelper {
     }
 
     public MediaSessionCompat.Token getSessionToken() {
-        return mSession.getSessionToken();
+        if (mSession != null) {
+            return mSession.getSessionToken();
+        }
+        return null;
     }
 
     public void setMetadata(String title, Bitmap splashBitmap) {

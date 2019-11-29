@@ -9,6 +9,15 @@
     android:theme="@style/AppThemeDark"
     tools:ignore="Overdraw">
 
+    <SurfaceView
+        android:id="@+id/activity_video_subtitles"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center" />
+
     <com.quewelcy.omnios.view.moving.MeanderBgSurfaceView
         android:id="@+id/activity_video_surface"
         android:layout_width="match_parent"

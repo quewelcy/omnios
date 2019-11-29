@@ -26,6 +26,7 @@ import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
@@ -65,7 +66,7 @@ import static com.quewelcy.omnios.Configures.Extras.STATE;
 import static com.quewelcy.omnios.Configures.millisToTimeString;
 
 public class VideoActivity extends AppCompatActivity
-        implements IVLCVout.Callback {
+        implements IVLCVout.Callback, IVLCVout.OnNewVideoLayoutListener {
 
     private static final FileFilter VIDEO_FILTER = f -> f.isFile() && Configures.isVideo(f.getName().toLowerCase());
     private PhoneStateListener mPhoneStateListener;
@@ -73,6 +74,7 @@ public class VideoActivity extends AppCompatActivity
     private TelephonyManager mTelephonyManager;
 
     private MeanderBgSurfaceView mSurfaceView;
+    private SurfaceView mSubtitlesView;
     private SurfaceHolder mSurfaceHolder;
     private ProgressBar mSpin;
     private View mSeekBox;
@@ -244,6 +246,7 @@ public class VideoActivity extends AppCompatActivity
         mCurTime = findViewById(R.id.activity_video_cur_time);
         mEndTime = findViewById(R.id.activity_video_end_time);
         mSurfaceView = findViewById(R.id.activity_video_surface);
+        mSubtitlesView = findViewById(R.id.activity_video_subtitles);
         mToolbar = findViewById(R.id.toolbar);
 
         mUrl = Configures.getRealPathFromURI(this, getIntent().getData());
@@ -264,7 +267,7 @@ public class VideoActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Set<String> granted = new HashSet<>();
         if (requestCode == PermissionRequestCode.REQ_CODE) {
             for (int i = 0; i < permissions.length; i++) {
@@ -355,30 +358,27 @@ public class VideoActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initVLC() {
         try {
-            mLibVLC = new LibVLC();
+            mLibVLC = new LibVLC(this);
             mSurfaceHolder.setKeepScreenOn(true);
 
             mMediaPlayer = new MediaPlayer(mLibVLC);
             mMediaPlayer.setEventListener(mPlayerListener);
+            mMediaPlayer.setMedia(new Media(mLibVLC, mUrl));
 
             final IVLCVout vOut = mMediaPlayer.getVLCVout();
             vOut.setVideoView(mSurfaceView);
+            vOut.setSubtitlesView(mSubtitlesView);
             vOut.addCallback(this);
-            vOut.attachViews();
-
-            Media m = new Media(mLibVLC, mUrl);
-            mMediaPlayer.setMedia(m);
+            vOut.attachViews(this);
 
             if (!mIsPaused) {
                 mMediaPlayer.play();
@@ -579,7 +579,7 @@ public class VideoActivity extends AppCompatActivity
     }
 
     @Override
-    public void onNewLayout(IVLCVout vlcVOut, int width, int height, int visibleWidth, int visibleHeight, int sarNum, int sarDen) {
+    public void onNewVideoLayout(IVLCVout vlcVOut, int width, int height, int visibleWidth, int visibleHeight, int sarNum, int sarDen) {
         mVideoWidth = width;
         mVideoHeight = height;
         resizeVideo();

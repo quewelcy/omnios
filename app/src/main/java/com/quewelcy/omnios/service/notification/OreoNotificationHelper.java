@@ -35,7 +35,7 @@ public class OreoNotificationHelper extends NotificationHelper {
 
     @TargetApi(Build.VERSION_CODES.O)
     public void showNotifier(Playable playable, MediaSession.Token token, boolean setPlay) {
-        if (playable == null) {
+        if (playable == null || token == null) {
             return;
         }
 

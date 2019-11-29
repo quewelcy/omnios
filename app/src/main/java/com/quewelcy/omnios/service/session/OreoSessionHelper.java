@@ -28,7 +28,10 @@ public class OreoSessionHelper extends SessionHelper {
     }
 
     public MediaSession.Token getOreoSessionToken() {
-        return mSessionOreo.getSessionToken();
+        if (mSessionOreo != null) {
+            return mSessionOreo.getSessionToken();
+        }
+        return null;
     }
 
     @Override

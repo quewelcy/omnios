@@ -40,7 +40,7 @@ public class NotificationHelper extends ContextWrapper {
     }
 
     public void showNotifier(Playable playable, MediaSessionCompat.Token token, boolean setPlay) {
-        if (playable == null) {
+        if (playable == null || token == null) {
             return;
         }
 
